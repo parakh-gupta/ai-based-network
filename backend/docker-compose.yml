@@ -1,0 +1,17 @@
+services:
+  rasa:
+    image: rasa/rasa:3.6.0-full
+    working_dir: /app
+    volumes:
+      - ./:/app
+    # Use the image default entrypoint so command arguments (e.g. 'rasa train') are handled correctly.
+
+  backend:
+    build: .
+    volumes:
+      - ./:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on: []

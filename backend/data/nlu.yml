@@ -1,0 +1,86 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - good morning
+    - good evening
+    - hello there
+    - hey there
+    - hi there
+
+- intent: network_topology_info
+  examples: |
+    - I have a [star](topology) topology with [5](device_count) devices
+    - My network is [mesh](topology) with [10](device_count) devices
+    - We use [ring](topology) topology with [8](device_count) nodes
+    - [Bus](topology) topology has [4](device_count) devices
+    - [Line](topology) network with [12](device_count) computers
+    - The topology is [star](topology) and we have [3](device_count) devices
+    - Our [mesh](topology) network has [20](device_count) nodes
+    - I want to describe my [star](topology) network with [7](device_count) devices
+    - [Ring](topology) topology with [6](device_count) devices
+    - [Bus](topology) topology with [15](device_count) devices
+
+- intent: device_count
+  examples: |
+    - I have [5](device_count) devices
+    - There are [10](device_count) devices
+    - We have [8](device_count) nodes
+    - [12](device_count) computers
+    - [4](device_count) machines
+    - [15](device_count) endpoints
+    - [3](device_count) devices total
+    - [6](device_count) devices in total
+    - [20](device_count) nodes
+    - [7](device_count) devices
+
+- intent: topology_only
+  examples: |
+    - The topology is [star](topology)
+    - We use [mesh](topology)
+    - It's a [ring](topology) network
+    - [Bus](topology) network
+    - [Line](topology) setup
+    - [Star](topology) topology
+    - [Mesh](topology) topology
+    - [Ring](topology) network
+    - [Bus](topology) configuration
+    - [Line](topology) network
+
+- intent: nlu_fallback
+  examples: |
+    - what is your name
+    - who are you
+    - help me
+    - I need assistance
+    - can you help
+    - what can you do
+    - tell me more
+    - how does this work
+
+- intent: thanks
+  examples: |
+    - thanks
+    - thank you
+    - thank you so much
+    - great, thanks
+    - thanks a lot
+    - appreciate it
+    - thanks for the help
+    - thank you very much
+
+- intent: goodbye
+  examples: |
+    - bye
+    - goodbye
+    - see you around
+    - see you later
+    - farewell
+    - goodbye friend
+    - bye bye
+    - have a good day
+    - take care

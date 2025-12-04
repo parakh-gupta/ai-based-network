@@ -1,0 +1,67 @@
+version: "3.1"
+
+intents:
+  - greet
+  - network_topology_info
+  - device_count
+  - topology_only
+  - thanks
+  - goodbye
+  - nlu_fallback
+
+entities:
+  - topology
+  - device_count
+
+slots:
+  topology:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: topology
+      - type: from_text
+        intent: topology_only
+  device_count:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: device_count
+      - type: from_text
+        intent: device_count
+
+responses:
+  utter_greet:
+  - text: "Hello! I'm your network topology assistant. How can I help you?"
+  - text: "Hi there! I'm here to help with network topology information."
+  - text: "Greetings! Tell me about your network topology and devices."
+
+  utter_goodbye:
+  - text: "Goodbye! Have a great day!"
+  - text: "Bye! Feel free to come back anytime."
+  - text: "See you later!"
+
+  utter_thanks:
+  - text: "You're welcome! Happy to help."
+  - text: "Glad I could assist!"
+  - text: "My pleasure!"
+
+  utter_topology_info:
+  - text: "Perfect! I will create this {topology} topology with {device_count} devices."
+
+  utter_device_info:
+  - text: "Got it! You mentioned the device count. Can you also specify the topology type (ring, mesh, star, line, bus)?"
+
+  utter_topology_only:
+  - text: "I understand you have a {topology} topology. How many devices are in your network?"
+
+  utter_default:
+  - text: "I'm not sure I understood that. Could you tell me about your network topology and the number of devices?"
+
+  utter_both_info:
+  - text: "Great! I have both topology and device count. Creating {topology} topology with {device_count} devices."
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true

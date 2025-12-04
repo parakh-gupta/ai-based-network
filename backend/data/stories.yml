@@ -1,0 +1,89 @@
+version: "3.1"
+
+stories:
+- story: User provides complete topology information
+  steps:
+  - intent: network_topology_info
+  - action: utter_topology_info
+  - intent: thanks
+  - action: utter_thanks
+
+- story: Greet and say goodbye
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: User provides only device count
+  steps:
+  - intent: device_count
+  - action: utter_device_info
+
+- story: User provides only topology
+  steps:
+  - intent: topology_only
+  - action: utter_topology_only
+
+- story: User provides device count then topology
+  steps:
+  - intent: device_count
+  - action: utter_device_info
+  - intent: topology_only
+  - action: utter_both_info
+  - intent: thanks
+  - action: utter_thanks
+
+- story: User provides topology then device count
+  steps:
+  - intent: topology_only
+  - action: utter_topology_only
+  - intent: device_count
+  - action: utter_both_info
+  - intent: thanks
+  - action: utter_thanks
+
+- story: User greets then provides topology with devices
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: network_topology_info
+  - action: utter_topology_info
+
+- story: User asks for device count, provides it, then topology
+  steps:
+  - intent: device_count
+  - action: utter_device_info
+  - intent: device_count
+  - action: utter_device_info
+  - intent: topology_only
+  - action: utter_both_info
+
+- story: User provides topology, then devices, then says thanks
+  steps:
+  - intent: topology_only
+  - action: utter_topology_only
+  - intent: device_count
+  - action: utter_both_info
+  - intent: thanks
+  - action: utter_thanks
+
+- story: Complete conversation flow
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: device_count
+  - action: utter_device_info
+  - intent: topology_only
+  - action: utter_both_info
+  - intent: thanks
+  - action: utter_thanks
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: Fallback and recovery
+  steps:
+  - intent: nlu_fallback
+  - action: utter_default
+  - intent: network_topology_info
+  - action: utter_topology_info
