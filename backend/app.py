@@ -1,182 +1,114 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
+import requests
 import re
 import uuid
 
 app = Flask(__name__)
 CORS(app)
 
-# Load trained Rasa model
-model_path = 'models'
-interpreter = None
-agent = None
+# Rasa REST webhook and tracker URL
+RASA_WEBHOOK_URL = "http://rasa:5005/webhooks/rest/webhook"
+RASA_TRACKER_URL = "http://rasa:5005/conversations/{sender_id}/tracker"
 
-# Simple in-memory session store: session_id -> {"topology": ..., "devices": ...}
-# This keeps user-provided values across multiple requests so the user can send
-# device count and topology in separate messages and the server will combine them.
-sessions = {}
+# Global sender ID for single-user scenario
+SENDER_ID = str(uuid.uuid4())
 
-def load_rasa_model():
-    """Load the trained Rasa NLU model and Core agent."""
-    global interpreter, agent
-    try:
-        # Find the latest model in the models directory
-        if os.path.exists(model_path):
-            # Accept model directories or model archives (*.tar.gz)
-            entries = os.listdir(model_path)
-            models = [f for f in entries if os.path.isdir(os.path.join(model_path, f)) or f.endswith('.tar.gz')]
-            if models:
-                latest_model = os.path.join(model_path, sorted(models)[-1])
-                try:
-                    # Load Rasa imports lazily
-                    from rasa.core.agent import Agent as RasaAgent
-                    agent = RasaAgent.load(latest_model)
-                    print(f"✓ Loaded Core agent: {latest_model}")
-                    return True
-                except Exception:
-                    try:
-                        from rasa.nlu.model import Interpreter as RasaInterpreter
-                        interpreter = RasaInterpreter.load(latest_model)
-                        print(f"✓ Loaded NLU model: {latest_model}")
-                        return True
-                    except Exception:
-                        pass
-        print("✗ No trained model found. Please run: python train_model.py")
-        return False
-    except Exception as e:
-        print(f"✗ Error loading model: {str(e)}")
-        return False
-
-def extract_network_info(user_input):
+# -----------------------
+# Send message to Rasa via webhook
+# -----------------------
+def get_rasa_response(text: str, sender_id: str):
     """
-    Extract topology type and number of devices using the trained Rasa model.
-    Returns a dict with 'topology' and 'devices' keys.
+    Sends a message to Rasa REST webhook.
+    Returns:
+      - rasa_message: bot reply text
+      - slots: dictionary of relevant slots (entities) for context
     """
-    topology = None
-    devices = None
-    
+    rasa_message = None
+    slots = {}
+
     try:
-        if not interpreter and not agent:
-            return {
-                "topology": None,
-                "devices": None
-            }
-        
-        # Parse input using trained Rasa model
-        if agent:
-            parsed = agent.parse(user_input)
-        else:
-            parsed = interpreter.parse(user_input)
-            
-        entities = parsed.get('entities', [])
-        
-        for entity in entities:
-            if entity['entity'] == 'topology':
-                topology = entity['value'].lower()
-            elif entity['entity'] == 'device_count':
-                try:
-                    devices = int(entity['value'])
-                except:
-                    devices = entity['value']
-        
-        # Fallback: Extract numbers with regex
-        if not devices:
-            numbers = re.findall(r'\b(\d+)\b', user_input)
-            if numbers:
-                devices = int(numbers[0])
-        
-        return {
-            "topology": topology,
-            "devices": devices
-        }
+        # Send message to Rasa
+        response = requests.post(RASA_WEBHOOK_URL, json={"sender": sender_id, "message": text})
+        response.raise_for_status()
+        bot_responses = response.json()
+        if bot_responses:
+            rasa_message = bot_responses[0].get("text")
+
+        # Retrieve current conversation tracker to get slots
+        tracker_resp = requests.get(RASA_TRACKER_URL.format(sender_id=sender_id))
+        tracker_resp.raise_for_status()
+        tracker_data = tracker_resp.json()
+
+        # Extract slots for topology and device_count
+        slots["topology"] = tracker_data.get("slots", {}).get("topology")
+        slots["devices"] = tracker_data.get("slots", {}).get("device_count")
+
     except Exception as e:
-        return {
-            "topology": None,
-            "devices": None
-        }
+        print("❌ Rasa API error:", e)
 
-async def get_rasa_response(user_input):
-    """Get response from Rasa Core agent."""
-    try:
-        if agent:
-            responses = await agent.handle_text(user_input)
-            if responses:
-                return responses[0].get('text', 'Unable to process')
-    except:
-        pass
-    return None
+    return {"rasa_message": rasa_message, "slots": slots}
 
-@app.route('/chat', methods=['POST'])
+# -----------------------
+# Chat Endpoint
+# -----------------------
+@app.route("/chat", methods=["POST"])
 def chat():
-    """
-    Main chat endpoint that processes user input and returns Rasa model response.
-    """
-    try:
-        import asyncio
-        
-        data = request.get_json()
-        user_input = data.get('message', '').strip()
-        
-        if not user_input:
-            return jsonify({
-                "success": False,
-                "message": "Please provide input.",
-                "data": {
-                    "topology": None,
-                    "devices": None
-                }
-            }), 400
-        
-        # Get Rasa model response (dialogue response)
-        rasa_message = None
-        if agent:
-            try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                rasa_message = loop.run_until_complete(get_rasa_response(user_input))
-                loop.close()
-            except:
-                pass
-        
-        # Extract network information (entities)
-        network_info = extract_network_info(user_input)
-        
-        # Build data object with topology and devices
-        response_data = {
-            "topology": network_info.get('topology') if network_info.get('topology') else None,
-            "devices": network_info.get('devices') if network_info.get('devices') else None
-        }
-        
-        # Use Rasa model's message or fallback to default
-        if rasa_message:
-            message = rasa_message
-        else:
-            message = "Message received."
-        
-        return jsonify({
-            "success": True,
-            "message": message,
-            "data": response_data
-        }), 200
-    
-    except Exception as e:
+    global SENDER_ID
+    data = request.get_json()
+    user_message = data.get("message", "").strip()
+
+    if not user_message:
         return jsonify({
             "success": False,
-            "message": str(e),
-            "data": {
-                "topology": None,
-                "devices": None
-            }
-        }), 500
+            "create_topology": False,
+            "message": None,
+            "data": {"topology": None, "devices": None}
+        }), 400
 
-@app.route('/health', methods=['GET'])
+    # Get Rasa response & slots
+    rasa_data = get_rasa_response(user_message, SENDER_ID)
+    slots = rasa_data.get("slots", {})
+
+    # Fallback: regex for device count if slot is empty
+    if slots.get("devices") is None:
+        nums = re.findall(r"\b\d+\b", user_message)
+        if nums:
+            slots["devices"] = int(nums[0])
+
+    # Check if topology can be created
+    create_topology = slots.get("topology") is not None and slots.get("devices") is not None
+
+    # If topology created, generate new session/sender_id
+    if create_topology:
+        SENDER_ID = str(uuid.uuid4())
+
+    return jsonify({
+        "success": True,
+        "create_topology": create_topology,
+        "message": rasa_data.get("rasa_message"),
+        "data": {"topology": slots.get("topology"), "devices": slots.get("devices")}
+    })
+
+# -----------------------
+# Health Check
+# -----------------------
+@app.route("/health", methods=["GET"])
 def health():
-    """Health check endpoint."""
-    return jsonify({"status": "healthy", "model_loaded": interpreter is not None or agent is not None}), 200
+    try:
+        resp = requests.get("http://rasa:5005/health")
+        rasa_healthy = resp.status_code == 200 and resp.json().get("status") == "healthy"
+    except:
+        rasa_healthy = False
 
-if __name__ == '__main__':
-    print("Loading Rasa model...")
-    load_rasa_model()
-    print("Starting Flask server on http://0.0.0.0:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    return jsonify({
+        "status": "healthy",
+        "rasa_healthy": rasa_healthy
+    })
+
+# -----------------------
+# Entry Point
+# -----------------------
+if __name__ == "__main__":
+    print("🌐 Starting Flask server at http://0.0.0.0:5000")
+    app.run(host="0.0.0.0", port=5000)

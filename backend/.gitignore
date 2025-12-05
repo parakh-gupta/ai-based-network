@@ -1,4 +1,3 @@
-
 # RASA files
 .config
 .keras
@@ -6,6 +5,3 @@
 models/
 backend/models/
 
-
-# Frontend node modules
-frontend/node_modules/

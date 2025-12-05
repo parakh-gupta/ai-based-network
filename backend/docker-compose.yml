@@ -1,17 +1,27 @@
+
 services:
   rasa:
     image: rasa/rasa:3.6.0-full
-    working_dir: /app
+    container_name: rasa
     volumes:
-      - ./:/app
-    # Use the image default entrypoint so command arguments (e.g. 'rasa train') are handled correctly.
+      - ./models:/app/models       # mount models
+    ports:
+      - "5005:5005"
+    command: >
+      run
+      --model /app/models
+      --enable-api
+      --cors "*"
+      --debug
 
   backend:
     build: .
+    container_name: backend
     volumes:
       - ./:/app
     ports:
       - "5000:5000"
     environment:
       - PYTHONUNBUFFERED=1
-    depends_on: []
+    depends_on:
+      - rasa
