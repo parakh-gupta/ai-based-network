@@ -8,6 +8,7 @@ intents:
   - thanks
   - goodbye
   - nlu_fallback
+  - create_topology_only 
 
 entities:
   - topology
@@ -60,7 +61,10 @@ responses:
   - text: "I'm not sure I understood that. Could you tell me about your network topology and the number of devices?"
 
   utter_both_info:
-  - text: "Great! I have both topology and device count. Creating {topology} topology with {device_count} devices."
+  - text: "Great! I have both topology and device count. Creating a {topology} topology with {device_count} devices."
+
+  utter_ask_topology_type_and_device_count:
+  - text: "Sure! What type of topology would you like (star, ring, mesh, bus, line)? And how many devices should it have?"
 
 session_config:
   session_expiration_time: 60

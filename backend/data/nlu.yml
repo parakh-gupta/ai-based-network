@@ -51,6 +51,19 @@ nlu:
     - [Bus](topology) configuration
     - [Line](topology) network
 
+- intent: create_topology_only
+  examples: |
+    - I want to create a network topology
+    - I would like to set up a network
+    - Can you create a network topology for me?
+    - I want to design a network
+    - I need a network topology
+    - Let's create a network
+    - I want to build a network
+    - Can you help me create a network topology?
+    - I want to start a new network
+    - I want to define a network topology
+
 - intent: nlu_fallback
   examples: |
     - what is your name

@@ -23,9 +23,14 @@ rules:
   - intent: network_topology_info
   - action: utter_topology_info
 
+
+- rule: Respond when user wants to create a topology without details
+  steps:
+  - intent: create_topology_only
+  - action: utter_ask_topology_type_and_device_count
+
 # Fallback rule
 - rule: Handle fallback and provide default response
   steps:
   - intent: nlu_fallback
   - action: utter_default
-

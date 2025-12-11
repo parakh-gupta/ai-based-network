@@ -87,3 +87,30 @@ stories:
   - action: utter_default
   - intent: network_topology_info
   - action: utter_topology_info
+
+- story: User wants to create topology without details
+  steps:
+  - intent: create_topology_only
+  - action: utter_ask_topology_type_and_device_count
+
+- story: User wants to create topology and then provides topology type and device count
+  steps:
+  - intent: create_topology_only
+  - action: utter_ask_topology_type_and_device_count
+  - intent: topology_only
+  - action: utter_topology_only
+  - intent: device_count
+  - action: utter_both_info
+  - intent: thanks
+  - action: utter_thanks
+
+- story: User greets, wants to create topology, and provides details
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: create_topology_only
+  - action: utter_ask_topology_type_and_device_count
+  - intent: network_topology_info
+  - action: utter_topology_info
+  - intent: goodbye
+  - action: utter_goodbye
