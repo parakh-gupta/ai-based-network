@@ -33,9 +33,9 @@ slots:
 
 responses:
   utter_greet:
-  - text: "Hello! I'm your network topology assistant. How can I help you?"
-  - text: "Hi there! I'm here to help with network topology information."
-  - text: "Greetings! Tell me about your network topology and devices."
+  - text: "Hello! I'm your network topology assistant. How can I assist you today?"
+  - text: "Hi there! I'm here to help you with your network topology."
+  - text: "Greetings! Tell me about your network and the devices you have."
 
   utter_goodbye:
   - text: "Goodbye! Have a great day!"

@@ -12,6 +12,8 @@ A Python-based chatbot API that uses Rasa NLU and Core to extract network topolo
 
 ## Quick Docker Setup
 
+Both Rasa and the Flask backend run in containers.
+
 1. Open a terminal and change to the `backend` directory:
 
 ```bash
@@ -24,8 +26,12 @@ cd backend
 docker-compose build backend
 docker-compose up -d backend
 ```
+This will:
 
-The Flask backend will be available at `http://localhost:5000` (it reads trained Rasa models from the `models/` folder shared with the host).
+- Build the backend Flask image
+- Start Rasa (port 5005)
+- Start Backend API (port 5000)
+- Mount your entire project into /app inside both containers
 
 3. Train the Rasa model (runs inside the official Rasa image and writes `models/` to the host):
 
@@ -44,12 +50,6 @@ docker-compose run --rm -w /app rasa shell
 ```bash
 docker-compose down
 ```
-
-## How this works
-
-- The `rasa` service uses the official `rasa/rasa:3.6.0-full` image for training and interactive testing.
-- The `backend` service builds from the provided `Dockerfile` and runs the Flask app on port 5000.
-- Both services mount the project directory into `/app` so the trained `models/` directory created by the Rasa container is visible to the backend container and the host.
 
 ## Example: Send a chat message
 

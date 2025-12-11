@@ -24,7 +24,7 @@ export interface ChatRequest {
 export interface ChatResponse {
   success: boolean;
   create_topology: boolean;
-  message: string | null; // Rasa bot message
+  message: string | null;
   data: {
     topology: string | null;
     devices: number | null;
@@ -33,7 +33,7 @@ export interface ChatResponse {
 
 export interface HealthResponse {
   status: string;         // "healthy"
-  rasa_healthy: boolean;  // true if Rasa server is healthy
+  rasa_healthy: boolean;  // true or false
 }
 
 export const chatAPI = {

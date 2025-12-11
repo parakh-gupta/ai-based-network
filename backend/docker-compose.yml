@@ -4,7 +4,7 @@ services:
     image: rasa/rasa:3.6.0-full
     container_name: rasa
     volumes:
-      - ./models:/app/models       # mount models
+      - ./:/app
     ports:
       - "5005:5005"
     command: >
