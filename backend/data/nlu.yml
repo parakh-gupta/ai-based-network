@@ -64,6 +64,17 @@ nlu:
     - I want to start a new network
     - I want to define a network topology
 
+- intent: clean_topology
+  examples: |
+    - Reset the topology
+    - Start a new network
+    - Clear the current network
+    - I want to start over
+    - Reset everything
+    - Clear topology
+    - Begin a fresh network
+    - Delete current network
+
 - intent: nlu_fallback
   examples: |
     - what is your name

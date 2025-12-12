@@ -13,7 +13,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { Box } from '@mui/material';
 
-type TopologyType = 'star' | 'ring' | 'line' | 'bus' | 'mesh';
+export type TopologyType = 'star' | 'ring' | 'line' | 'bus' | 'mesh' | 'clean';
 
 interface CanvasProps {
   topology?: TopologyType;
@@ -37,6 +37,8 @@ const Canvas: React.FC<CanvasProps> = ({ topology, deviceCount }) => {
     const radius = 150;
 
     switch (type.toLowerCase()) {
+      case "clean":
+        break;
       case 'star':
         // Center node
         newNodes.push({
@@ -150,7 +152,7 @@ const Canvas: React.FC<CanvasProps> = ({ topology, deviceCount }) => {
 
   // Automatically create topology if props are passed
   React.useEffect(() => {
-    if (topology && deviceCount && deviceCount > 0) {
+    if (topology && deviceCount !== undefined) {
       createTopology(topology, deviceCount);
     }
   }, [topology, deviceCount]);

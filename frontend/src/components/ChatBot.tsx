@@ -12,7 +12,7 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import { chatAPI, type ChatMessage } from '../services/api';
 interface ChatBotProps {
-  onCreateTopology?: (topology: string, devices: number) => void;
+  onCreateTopology: (topology: string, devices: number) => void;
 }
 
 const ChatBot: React.FC<ChatBotProps> = ({ onCreateTopology }) => {
@@ -58,8 +58,10 @@ const ChatBot: React.FC<ChatBotProps> = ({ onCreateTopology }) => {
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, botMessage]);
-
-        if (response.data.topology && response.data.devices && onCreateTopology) {
+        if (response.message?.indexOf("cleared") !== -1 ) {
+          onCreateTopology("clean", 0);
+        }
+        else if (response.data.topology && response.data.devices ) {
           onCreateTopology(response.data.topology, response.data.devices);
         }
       }

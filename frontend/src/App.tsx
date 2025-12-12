@@ -1,5 +1,5 @@
 import { Box, Container } from '@mui/material';
-import Canvas from './components/Canvas';
+import Canvas, { type TopologyType } from './components/Canvas';
 import ChatBot from './components/ChatBot';
 import { useState } from 'react';
 import './App.css';
@@ -33,7 +33,7 @@ function App() {
           borderRight: '1px solid #e0e0e0',
         }}
       >
-        <Canvas topology={topologyData.topology as any} deviceCount={topologyData.devices} />
+        <Canvas topology={topologyData.topology as TopologyType} deviceCount={topologyData.devices} />
       </Box>
 
       {/* ChatBot Section */}

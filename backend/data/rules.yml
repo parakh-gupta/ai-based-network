@@ -29,6 +29,11 @@ rules:
   - intent: create_topology_only
   - action: utter_ask_topology_type_and_device_count
 
+- rule: Clean current topology
+  steps:
+  - intent: clean_topology
+  - action: utter_clean_topology
+
 # Fallback rule
 - rule: Handle fallback and provide default response
   steps:

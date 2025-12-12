@@ -114,3 +114,15 @@ stories:
   - action: utter_topology_info
   - intent: goodbye
   - action: utter_goodbye
+
+- story: User clears the current topology
+  steps:
+  - intent: clean_topology
+  - action: utter_clean_topology
+
+- story: User clears topology and starts new
+  steps:
+  - intent: clean_topology
+  - action: utter_clean_topology
+  - intent: create_topology_only
+  - action: utter_ask_topology_type_and_device_count

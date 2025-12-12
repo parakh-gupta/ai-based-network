@@ -23,9 +23,11 @@ def get_rasa_response(text: str, sender_id: str):
     Returns:
       - rasa_message: bot reply text
       - slots: dictionary of relevant slots (entities) for context
+      - intent: detected intent
     """
     rasa_message = None
     slots = {}
+    intent = None
 
     try:
         # Send message to Rasa
@@ -35,7 +37,7 @@ def get_rasa_response(text: str, sender_id: str):
         if bot_responses:
             rasa_message = bot_responses[0].get("text")
 
-        # Retrieve current conversation tracker to get slots
+        # Retrieve current conversation tracker to get slots and latest intent
         tracker_resp = requests.get(RASA_TRACKER_URL.format(sender_id=sender_id))
         tracker_resp.raise_for_status()
         tracker_data = tracker_resp.json()
@@ -44,10 +46,14 @@ def get_rasa_response(text: str, sender_id: str):
         slots["topology"] = tracker_data.get("slots", {}).get("topology")
         slots["devices"] = tracker_data.get("slots", {}).get("device_count")
 
+        # Get latest intent
+        latest_event = tracker_data.get("latest_message", {})
+        intent = latest_event.get("intent", {}).get("name")
+
     except Exception as e:
         print("❌ Rasa API error:", e)
 
-    return {"rasa_message": rasa_message, "slots": slots}
+    return {"rasa_message": rasa_message, "slots": slots, "intent": intent}
 
 # -----------------------
 # Chat Endpoint
@@ -69,12 +75,25 @@ def chat():
     # Get Rasa response & slots
     rasa_data = get_rasa_response(user_message, SENDER_ID)
     slots = rasa_data.get("slots", {})
+    intent = rasa_data.get("intent")
 
     # Fallback: regex for device count if slot is empty
     if slots.get("devices") is None:
         nums = re.findall(r"\b\d+\b", user_message)
         if nums:
             slots["devices"] = int(nums[0])
+
+    # Handle clean_topology: reset sender/session
+    if intent == "clean_topology":
+        SENDER_ID = str(uuid.uuid4())
+        slots["topology"] = None
+        slots["devices"] = None
+        return jsonify({
+            "success": True,
+            "create_topology": False,
+            "message": rasa_data.get("rasa_message"),
+            "data": {"topology": None, "devices": None}
+        })
 
     # Check if topology can be created
     create_topology = slots.get("topology") is not None and slots.get("devices") is not None

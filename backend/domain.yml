@@ -5,10 +5,11 @@ intents:
   - network_topology_info
   - device_count
   - topology_only
+  - create_topology_only
+  - clean_topology      
   - thanks
   - goodbye
   - nlu_fallback
-  - create_topology_only 
 
 entities:
   - topology
@@ -52,19 +53,17 @@ responses:
   - text: "Perfect! I will create this {topology} topology with {device_count} devices."
 
   utter_device_info:
-  - text: "Got it! You mentioned the device count. Can you also specify the topology type (ring, mesh, star, line, bus)?"
-
+    - text: "Got it! You mentioned the device count. Could you also tell me the topology type (ring, mesh, star, line, bus)?"
   utter_topology_only:
-  - text: "I understand you have a {topology} topology. How many devices are in your network?"
-
+    - text: "I see you have a {topology} topology. How many devices are in your network?"
   utter_default:
-  - text: "I'm not sure I understood that. Could you tell me about your network topology and the number of devices?"
-
+    - text: "I'm not sure I understood. Could you please tell me your network topology and the number of devices?"
   utter_both_info:
-  - text: "Great! I have both topology and device count. Creating a {topology} topology with {device_count} devices."
-
+    - text: "Great! I have both the topology and device count. Creating a {topology} topology with {device_count} devices."
   utter_ask_topology_type_and_device_count:
-  - text: "Sure! What type of topology would you like (star, ring, mesh, bus, line)? And how many devices should it have?"
+    - text: "Sure! What type of topology would you like (star, ring, mesh, bus, line)? And how many devices should it have?"
+  utter_clean_topology:
+    - text: "Okay! I’ve cleared the current topology. You can start fresh and define a new one."
 
 session_config:
   session_expiration_time: 60
